@@ -7,6 +7,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
 import org.springframework.kotlin.getForObject
+import org.springframework.kotlin.linkEachStatic
+import org.springframework.kotlin.toPagedResources
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 
@@ -51,4 +53,6 @@ class TitleController(val restTemplate: RestTemplate) {
     fun searchTitles(@RequestParam q: String) =
         restTemplate.getForObject<SearchResults>("http://www.omdbapi.com/?s=$q")
             .titles
+            .toPagedResources()
+            .linkEachStatic("firstWord", { t -> "http://www.omdbapi.com/?s=${t.title.split(' ').first()}" })
 }
