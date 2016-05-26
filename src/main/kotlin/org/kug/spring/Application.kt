@@ -1,14 +1,25 @@
 package org.kug.spring
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.databind.DeserializationFeature
 import org.springframework.boot.SpringApplication
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.context.annotation.Bean
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+import org.springframework.kotlin.getForObject
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.RestTemplate
 
 @SpringBootApplication
-open class Application
+open class Application {
+    @Bean
+    open fun restTemplate() = RestTemplate()
+
+    @Bean
+    open fun objectMapperBuilder() =
+            Jackson2ObjectMapperBuilder()
+                    .featuresToDisable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+}
 
 fun main(args: Array<String>) {
     SpringApplication.run(Application::class.java, *args)
@@ -28,4 +39,16 @@ class QuoteController {
 
     @RequestMapping(method = arrayOf(RequestMethod.POST))
     fun addQuote(@RequestBody quote: Quote) = quotes.add(quote)
+}
+
+data class Title(@JsonProperty("Title") val title: String, @JsonProperty("Year") val year: String)
+data class SearchResults(@JsonProperty("Search") val titles: List<Title>)
+
+@RestController
+@RequestMapping("/api/titles")
+class TitleController(val restTemplate: RestTemplate) {
+    @RequestMapping
+    fun searchTitles(@RequestParam q: String) =
+        restTemplate.getForObject<SearchResults>("http://www.omdbapi.com/?s=$q")
+            .titles
 }
