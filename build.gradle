@@ -29,6 +29,7 @@ dependencies {
 
     compile "org.springframework.boot:spring-boot-starter-web"
     compile 'org.springframework:spring-kotlin:latest.integration'
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.7.1-2'
 
     testCompile "org.springframework.boot:spring-boot-starter-test"
 }
