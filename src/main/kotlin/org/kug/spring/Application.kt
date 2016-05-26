@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.RestTemplate
 
 @SpringBootApplication
-@EnableAspectJAutoProxy(proxyTargetClass = true)
+@EnableAspectJAutoProxy
 open class Application {
     @Bean
     open fun restTemplate() = RestTemplate()
@@ -44,14 +44,19 @@ class LoggingAspect {
 
 data class Quote(val person: String, val text: String)
 
+interface QuoteRepository {
+    fun allQuotes(): Set<Quote>
+    fun addQuote(q: Quote): Boolean
+}
+
 @Repository
-class QuoteRepository {
+class QuoteRepositoryImpl: QuoteRepository {
     private val quotes = mutableSetOf(
             Quote("Frank Underwood", "Money is the Mc-mansion in Sarasota that starts falling apart after 10 years."),
             Quote("Frank Underwood", "Power is a lot like real estate. It’s all about location, location, location."))
 
-    fun allQuotes() = quotes
-    fun addQuote(q: Quote) = quotes.add(q)
+    override fun allQuotes() = quotes
+    override fun addQuote(q: Quote) = quotes.add(q)
 }
 
 @RestController
